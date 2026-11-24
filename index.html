@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opportunity Compass — Hi-Fi Prototype</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F1F5F9; color: #0F172A; min-height: 100vh; display: flex; flex-direction: column; }
+    button, a { cursor: pointer; font-family: inherit; }
+    
+    /* Header */
+    header { height: 64px; background: #FFFFFF; border-bottom: 1px solid #E2E8F0; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; }
+    .brand { display: flex; align-items: center; gap: 10px; background: none; border: none; font-size: 18px; font-weight: 800; color: #0F172A; }
+    .brand-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #1D56F0, #1E40AF); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+    .search-box { flex: 1; max-width: 480px; margin: 0 16px; }
+    .search-box input { width: 100%; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid #CBD5E1; background: #F8FAFC; font-size: 13px; }
+    .search-box input:focus { outline: none; border-color: #1D56F0; background: #FFF; }
+    .header-right { display: flex; align-items: center; gap: 12px; position: relative; }
+    .icon-btn { position: relative; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 7px 10px; font-size: 15px; }
+    .notif-dot { position: absolute; top: -4px; right: -4px; background: #DC2626; color: #FFF; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 99px; }
+    .profile-pill { display: flex; align-items: center; gap: 8px; background: none; border: 1px solid transparent; padding: 5px 10px; border-radius: 10px; }
+    .profile-pill:hover { background: #F1F5F9; }
+    .avatar { width: 32px; height: 32px; border-radius: 99px; background: #1D56F0; color: #FFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+    /* Layout */
+    .shell { display: flex; flex: 1; }
+    aside { width: 230px; background: #FFFFFF; border-right: 1px solid #E2E8F0; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+    .nav-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 10px; border: 1px solid transparent; background: none; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 4px; text-align: left; }
+    .nav-btn:hover { background: #F8FAFC; color: #0F172A; }
+    .nav-btn.active { background: #EFF6FF; color: #1D56F0; border-color: #BFDBFE; }
+    .badge-count { background: #DBEAFE; color: #1D4ED8; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; }
+    main { flex: 1; padding: 28px; max-width: 1100px; }
+
+    /* Cards & Controls */
+    .card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03); }
+    .hero { background: linear-gradient(135deg, #1D56F0, #1E3A8A); color: #FFF; border-radius: 16px; padding: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; margin-top: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-top: 16px; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .filter-pill { padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; border: 1px solid #CBD5E1; background: #FFF; color: #475569; }
+    .filter-pill.active { background: #1D56F0; color: #FFF; border-color: #1D56F0; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .tag-green { background: #DCFCE7; color: #166534; }
+    .tag-purple { background: #F3E8FF; color: #6B21A8; }
+    .tag-blue { background: #DBEAFE; color: #1E40AF; }
+    .tag-amber { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+    .tag-gray { background: #F1F5F9; color: #475569; }
+
+    .btn-primary { background: #1D56F0; color: #FFF; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+    .btn-primary:hover { background: #1E40AF; }
+    .btn-secondary { background: #FFF; color: #1E293B; border: 1px solid #CBD5E1; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .btn-saved { background: #ECFDF5; color: #047857; border: 1px solid #6EE7B7; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+    .btn-external { background: #EFF6FF; color: #1D56F0; border: 1.5px solid #1D56F0; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+
+    /* Popover & Toast */
+    .popover { position: absolute; right: 90px; top: 52px; width: 300px; background: #FFF; border: 1px solid #CBD5E1; border-radius: 14px; padding: 16px; box-shadow: 0 12px 28px rgba(0,0,0,0.12); z-index: 50; }
+    .hidden { display: none !important; }
+    #toastRack { position: fixed; bottom: 20px; right: 20px; z-index: 60; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: #0F172A; color: #FFF; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 55; }
+    .modal-card { background: #FFF; border-radius: 16px; padding: 24px; max-width: 440px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <button class="brand" data-action="nav" data-target="home">
+      <span class="brand-icon">OC</span>
+      <span>Opportunity Compass</span>
+    </button>
+
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="Search scholarships, hackathons, internships..." />
+    </div>
+
+    <div class="header-right">
+      <button class="icon-btn" id="notifBtn" title="Active Alerts">
+        🔔 <span class="notif-dot">2</span>
+      </button>
+
+      <div id="notifPopover" class="popover hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <strong style="font-size:12px;color:#475569;">ACTIVE 3-STAGE ALERTS</strong>
+          <button id="closeNotifBtn" style="background:none;border:none;font-size:14px;">✕</button>
+        </div>
+        <div style="background:#FEF3C7;border:1px solid #FCD34D;padding:10px;border-radius:10px;font-size:12px;margin-bottom:8px;">
+          <strong style="color:#92400E;">🔔 3d Alert · HackPulse 2026</strong>
+          <div style="color:#78350F;margin-top:2px;">Round 1 submission closes Nov 6 (11:59 PM).</div>
+        </div>
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;padding:10px;border-radius:10px;font-size:12px;">
+          <strong style="color:#1E40AF;">📅 7d Alert · Google STEP</strong>
+          <div style="color:#1E3A8A;margin-top:2px;">Upload transcript before Nov 15.</div>
+        </div>
+      </div>
+
+      <button class="profile-pill" data-action="nav" data-target="profile">
+        <span class="avatar">BG</span>
+        <div style="text-align:left;">
+          <div style="font-size:12px;font-weight:700;color:#0F172A;">Bhavishya G.</div>
+          <div id="subProfile" style="font-size:11px;color:#64748B;">1st Yr · CSE</div>
+        </div>
+      </button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside>
+      <div>
+        <button class="nav-btn active" data-action="nav" data-target="home"><span>🏠 Home</span></button>
+        <button class="nav-btn" data-action="nav" data-target="explore"><span>🧭 Explore</span></button>
+        <button class="nav-btn" data-action="nav" data-target="saved"><span>🔖 Saved</span> <span id="savedBadge" class="badge-count">4</span></button>
+        <button class="nav-btn" data-action="nav" data-target="calendar"><span>📅 Calendar</span></button>
+        <button class="nav-btn" data-action="nav" data-target="profile"><span>👤 Profile</span></button>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:12px;font-size:11px;color:#475569;">
+        <strong style="color:#0F172A;display:block;margin-bottom:4px;">Accessibility Mode: ON</strong>
+        Status badges combine color with explicit text labels (Eligible / Urgent).
+      </div>
+    </aside>
+
+    <main id="workspace"></main>
+  </div>
+
+  <div id="modalRoot" class="modal-bg hidden"></div>
+  <div id="toastRack"></div>
+
+  <script>
+    const state = {
+      view: 'home',
+      selectedId: 'hackpulse-2026',
+      homeFilter: 'All',
+      exploreFilter: 'All',
+      savedFilter: 'All',
+      calMode: 'month',
+      query: '',
+      calSynced: false,
+      profile: { year: '1st Year', branch: 'Computer Science & Engineering', city: 'Delhi', income: '≤ 8 LPA', goals: ['Hackathons & Competitions'] },
+      items: [
+        {
+          id: 'hackpulse-2026',
+          title: 'HackPulse 2026 – AI & Web',
+          category: 'Hackathon',
+          org: 'TechCorp & ACM • Team size: 2 to 4',
+          date: 'Nov 6, 2026',
+          daysLeft: 3,
+          urgent: true,
+          saved: true,
+          match: '3 of 3 criteria matched',
+          checks: ['1st/2nd Year B.Tech', 'CS / IT Branch', 'Free Registration'],
+          rules: ['Round 1 online idea submission due Nov 6 (11:59 PM)', 'Cash prize pool ₹2,00,000 + internship fast-track', 'Teams of 2 to 4 members'],
+          about: 'Build and deploy an AI-assisted web product in 36 hours. Finalists pitch live to engineering leads from TechCorp.',
+          reward: '₹2,00,000 Prize Pool + PPO Interviews',
+          docs: [{ name: 'College Student ID Card (PDF)', done: true }, { name: 'GitHub Repository Link', done: true }, { name: '2-Page Round 1 Abstract', done: false }],
+          alerts: { d7: true, d3: true, h24: true },
+          milestones: [{ title: 'Team Formed', due: 'Nov 2', done: true }, { title: 'Draft Proposal', due: 'Due Nov 4', done: false }, { title: 'Final Submission', due: 'Due Nov 6', done: false }],
+          team: ['Bhavishya G. (Lead)', 'Ananya M.', 'Rohan S.'],
+          url: 'https://unstop.com'
+        },
+        {
+          id: 'nsp-merit-2026',
+          title: 'National Merit Scholarship 2026',
+          category: 'Scholarship',
+          org: 'Ministry of Education (NSP) • Full tuition waiver',
+          date: 'Nov 17, 2026',
+          daysLeft: 14,
+          urgent: false,
+          saved: true,
+          match: '100% Eligible',
+          checks: ['B.Tech 1st Year', 'Merit > 80%', 'Income ≤ 8 LPA'],
+          rules: ['Covers full annual college tuition fee, paid directly to institute', 'Requires 10th/12th marksheets and income certificate', 'Online application through the NSP portal'],
+          about: 'Central Sector Scheme providing 100% tuition fee reimbursement for meritorious first-year undergraduate engineering students.',
+          reward: '100% Annual Tuition Waiver + ₹5,000/mo Stipend',
+          docs: [{ name: 'Class 10th & 12th Marksheets', done: true }, { name: 'SDM Income Certificate', done: false }, { name: 'Institute Fee Receipt', done: false }],
+          alerts: { d7: true, d3: false, h24: true },
+          milestones: [],
+          team: [],
+          url: 'https://scholarships.gov.in'
+        },
+        {
+          id: 'google-step-2026',
+          title: 'Google STEP Internship',
+          category: 'Internship',
+          org: 'Google • Hybrid • Bengaluru',
+          date: 'Nov 15, 2026',
+          daysLeft: 12,
+          urgent: false,
+          saved: true,
+          match: '3 of 3 criteria matched',
+          checks: ['1st Year Eligible', 'CS / IT Branch', 'Open to all India'],
+          rules: ['10–12 week summer software engineering internship in Bengaluru', 'Two 45-minute technical interviews focused on DSA', 'Resume + unofficial transcript required'],
+          about: 'Student Training in Engineering Program (STEP) pairs first-year CS undergraduates with Google engineers on real production projects.',
+          reward: '₹1,15,000/month Stipend + Corporate Housing',
+          docs: [{ name: '1-Page Technical Resume', done: true }, { name: '1st Semester Transcript', done: false }],
+          alerts: { d7: true, d3: true, h24: false },
+          milestones: [],
+          team: [],
+          url: 'https://buildyourfuture.withgoogle.com'
+        },
+        {
+          id: 'innovate-india-2026',
+          title: 'Innovate India Hackathon 2026',
+          category: 'Hackathon',
+          org: 'Online • Nov 20 – 22',
+          date: 'Nov 20, 2026',
+          daysLeft: 17,
+          urgent: false,
+          saved: true,
+          match: 'Open to 1st Year',
+          checks: ['1st Year Eligible', 'CS / IT Branch', 'Free Registration'],
+          rules: ['48-hour online build sprint with live Discord mentors', 'Submit GitHub repo + 3-minute demo video', 'Top 15 teams win cloud credits & certificates'],
+          about: 'Beginner-friendly national hackathon designed specifically for first-year students building their first full-stack or AI project.',
+          reward: '₹75,000 Prize Pool + ₹25,000 Cloud Credits',
+          docs: [{ name: 'College Email Verification', done: true }, { name: 'Team Roster (2–4 members)', done: true }],
+          alerts: { d7: true, d3: false, h24: false },
+          milestones: [{ title: 'Team Formed', due: 'Nov 10', done: true }, { title: 'Problem Statement', due: 'Due Nov 18', done: false }, { title: 'Prototype Demo', due: 'Due Nov 22', done: false }],
+          team: ['Bhavishya G. (Lead)', 'Bhavya K.'],
+          url: 'https://devfolio.co'
+        }
+      ]
+    };
+
+    function showToast(text) {
+      const rack = document.getElementById('toastRack');
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = '✓ ' + text;
+      rack.appendChild(el);
+      setTimeout(() => el.remove(), 2600);
+    }
+
+    function catTag(cat) {
+      const cls = cat === 'Hackathon' ? 'tag-purple' : cat === 'Scholarship' ? 'tag-green' : 'tag-blue';
+      return `<span class="tag ${cls}">${cat}</span>`;
+    }
+
+    function urgTag(item) {
+      return item.urgent
+        ? `<span class="tag tag-amber">⚠ Urgent · ${item.daysLeft} Days Left</span>`
+        : `<span class="tag tag-gray">🕒 ${item.daysLeft} Days Left</span>`;
+    }
+
+    function renderHome() {
+      const list = state.items.filter(i => state.homeFilter === 'All' || i.category.toLowerCase() === state.homeFilter.toLowerCase().replace(/s$/, '')).slice(0, 3);
+      return `
+        <div class="hero">
+          <div>
+            <span style="background:rgba(255,255,255,0.18);padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;">✨ Personalized Feed Active</span>
+            <h1 style="font-size:24px;font-weight:800;margin-top:8px;">Welcome back, Bhavishya</h1>
+            <p style="font-size:13px;color:#DBEAFE;margin-top:4px;">Matched to your profile: <strong>${state.profile.year} · ${state.profile.branch}</strong></p>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div style="background:rgba(255,255,255,0.12);padding:10px 16px;border-radius:12px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;">4</div>
+              <div style="font-size:11px;color:#DBEAFE;">100% Matches</div>
+            </div>
+            <div style="background:rgba(251,191,36,0.22);padding:10px 16px;border-radius:12px;text-align:center;">
+              <div style="font-size:20px;font-weight:800;color:#FDE68A;">1</div>
+              <div style="font-size:11px;color:#FEF3C7;">Due in 3 Days</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;">
+          <div class="pill-row">
+            <h2 style="font-size:16px;font-weight:800;margin-right:6px;">Recommended for You</h2>
+            ${['All', 'Hackathons', 'Scholarships', 'Internships'].map(tab => `
+              <button class="filter-pill ${state.homeFilter === tab ? 'active' : ''}" data-action="homeFilter" data-val="${tab}">${tab}</button>
+            `).join('')}
+          </div>
+          <button style="background:none;border:none;color:#1D56F0;font-weight:700;font-size:13px;" data-action="nav" data-target="explore">See all →</button>
+        </div>
+
+        <div class="grid-3">
+          ${list.map(item => `
+            <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
+              <div>
+                <div class="pill-row" style="margin-bottom:10px;">
+                  <span class="tag tag-green">✓ ${item.match}</span>
+                  ${catTag(item.category)}
+                </div>
+                <h3 style="font-size:16px;font-weight:800;margin-bottom:4px;">${item.title}</h3>
+                <p style="font-size:12px;color:#64748B;">${item.org}</p>
+                <p style="font-size:12px;font-weight:700;margin-top:8px;">Deadline: ${item.date}</p>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:16px;">
+                <button class="${item.saved ? 'btn-saved' : 'btn-secondary'}" data-action="toggleSave" data-id="${item.id}">${item.saved ? '✓ Saved' : 'Save'}</button>
+                <button class="btn-primary" style="flex:1;" data-action="detail" data-id="${item.id}">View Details →</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="card" style="margin-top:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h2 style="font-size:16px;font-weight:800;">Upcoming Deadlines</h2>
+            <button style="background:none;border:none;color:#1D56F0;font-weight:700;font-size:13px;" data-action="nav" data-target="calendar">View calendar →</button>
+          </div>
+          ${state.items.slice(0, 3).map(item => `
+            <div data-action="detail" data-id="${item.id}" style="display:flex;justify-content:space-between;align-items:center;padding:12px 8px;border-top:1px solid #F1F5F9;cursor:pointer;">
+              <div>
+                <div style="font-size:14px;font-weight:800;">${item.title}</div>
+                <div style="font-size:12px;color:#64748B;margin-top:2px;">${item.rules[0]}</div>
+              </div>
+              <div class="pill-row">
+                ${urgTag(item)}
+                <span style="font-weight:800;color:#94A3B8;">›</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderExplore() {
+      const list = state.items.filter(i => {
+        const catOk = state.exploreFilter === 'All' || i.category.toLowerCase() === state.exploreFilter.toLowerCase().replace(/s$/, '');
+        const qOk = !state.query || i.title.toLowerCase().includes(state.query) || i.category.toLowerCase().includes(state.query);
+        return catOk && qOk;
+      });
+      return `
+        <h1 style="font-size:22px;font-weight:800;">Explore Opportunities</h1>
+        <div class="pill-row" style="margin-top:14px;">
+          ${['All', 'Hackathons', 'Scholarships', 'Internships'].map(tab => `
+            <button class="filter-pill ${state.exploreFilter === tab ? 'active' : ''}" data-action="exploreFilter" data-val="${tab}">${tab}</button>
+          `).join('')}
+        </div>
+        <div class="grid-2">
+          ${list.map(item => `
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                <div class="pill-row">${catTag(item.category)} <span class="tag tag-blue">✓ Verified Official Source</span></div>
+                ${urgTag(item)}
+              </div>
+              <h3 style="font-size:17px;font-weight:800;margin-top:12px;">${item.title}</h3>
+              <p style="font-size:12px;color:#64748B;margin-top:2px;">${item.org}</p>
+              <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;">
+                ${item.checks.map(c => `<div style="font-size:12px;font-weight:600;color:#166534;">✓ ${c} (Eligible)</div>`).join('')}
+              </div>
+              <div style="display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid #F1F5F9;">
+                <button class="${item.saved ? 'btn-saved' : 'btn-secondary'}" data-action="toggleSave" data-id="${item.id}">${item.saved ? '✓ Saved' : 'Save'}</button>
+                <button class="btn-primary" data-action="detail" data-id="${item.id}">View Details →</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderSaved() {
+      const saved = state.items.filter(i => i.saved);
+      const list = saved.filter(i => state.savedFilter === 'All' || i.category.toLowerCase() === state.savedFilter.toLowerCase().replace(/s$/, ''));
+      return `
+        <h1 style="font-size:22px;font-weight:800;">Saved Opportunities (${saved.length})</h1>
+        <div class="pill-row" style="margin-top:14px;">
+          ${['All', 'Scholarships', 'Hackathons', 'Internships'].map(tab => `
+            <button class="filter-pill ${state.savedFilter === tab ? 'active' : ''}" data-action="savedFilter" data-val="${tab}">${tab}</button>
+          `).join('')}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-top:16px;">
+          ${list.map(item => `
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                <div>
+                  <div class="pill-row">
+                    <h3 style="font-size:17px;font-weight:800;">${item.title}</h3>
+                    <span class="tag tag-blue">✓ Verified Official Source</span>
+                  </div>
+                  <p style="font-size:12px;color:#64748B;margin-top:4px;">${item.org}</p>
+                </div>
+                ${urgTag(item)}
+              </div>
+              <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px;margin-top:12px;">
+                <div style="font-size:10px;font-weight:800;color:#64748B;margin-bottom:4px;">RULE SUMMARY</div>
+                <ul style="padding-left:18px;font-size:12px;color:#334155;line-height:1.6;">
+                  ${item.rules.map(r => `<li>${r}</li>`).join('')}
+                </ul>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center;">
+                <button class="btn-primary" data-action="detail" data-id="${item.id}">Doc Checklist & Details (${item.docs.filter(d=>d.done).length}/${item.docs.length})</button>
+                <button class="btn-secondary" data-action="alertModal" data-id="${item.id}">🔔 3-Stage Alert</button>
+                ${item.team.length ? `<button class="btn-secondary" data-action="inviteModal" data-id="${item.id}">👥 Invite Team (${item.team.length}/4)</button>` : ''}
+                <a href="${item.url}" target="_blank" rel="noopener" class="btn-external" style="margin-left:auto;">Go to Official Portal ↗</a>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderCalendar() {
+      return `
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;">
+          <h1 style="font-size:22px;font-weight:800;">Upcoming Deadlines</h1>
+          <div class="pill-row">
+            <button class="filter-pill ${state.calMode === 'month' ? 'active' : ''}" data-action="calMode" data-val="month">Month view</button>
+            <button class="filter-pill ${state.calMode === 'timeline' ? 'active' : ''}" data-action="calMode" data-val="timeline">Timeline view</button>
+            <button class="${state.calSynced ? 'btn-saved' : 'btn-secondary'}" data-action="syncCal">${state.calSynced ? '✓ Synced to Google Cal' : '📅 Sync with Google Cal'}</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:18px;">
+          ${state.items.map(item => `
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+                <div>
+                  <div style="font-size:11px;font-weight:800;color:${item.urgent ? '#B45309' : '#64748B'};">${item.urgent ? 'URGENT · THIS WEEK' : 'UPCOMING DEADLINE'}</div>
+                  <h3 style="font-size:16px;font-weight:800;margin-top:2px;">${item.date} – ${item.title}</h3>
+                  <p style="font-size:12px;color:#64748B;margin-top:2px;">${item.rules[0]}</p>
+                </div>
+                ${urgTag(item)}
+              </div>
+
+              <div class="pill-row" style="margin-top:12px;">
+                <button class="tag ${item.alerts.d7 ? 'tag-green' : 'tag-gray'}" style="border:none;" data-action="alertModal" data-id="${item.id}">✓ 7d · ${item.alerts.d7 ? 'Sent' : 'Off'}</button>
+                <button class="tag ${item.alerts.d3 ? 'tag-amber' : 'tag-gray'}" style="border:none;" data-action="alertModal" data-id="${item.id}">🔔 3d · ${item.alerts.d3 ? 'Today' : 'Off'}</button>
+                <button class="tag ${item.alerts.h24 ? 'tag-blue' : 'tag-gray'}" style="border:none;" data-action="alertModal" data-id="${item.id}">⏰ 24h · ${item.alerts.h24 ? 'Scheduled' : 'Off'}</button>
+              </div>
+
+              ${item.milestones.length ? `
+                <div data-action="detail" data-id="${item.id}" style="margin-top:12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                  <span style="font-size:12px;font-weight:700;color:#1E3A8A;">🚀 Milestone Step ${item.milestones.filter(m=>m.done).length}/${item.milestones.length}: Draft Proposal (Due Nov 4)</span>
+                  <span style="font-size:12px;font-weight:800;color:#1D56F0;">Open Tracker →</span>
+                </div>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderDetail() {
+      const item = state.items.find(i => i.id === state.selectedId) || state.items[0];
+      return `
+        <button style="background:none;border:none;color:#475569;font-weight:700;font-size:13px;margin-bottom:14px;" data-action="nav" data-target="home">← Back to Dashboard</button>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div class="pill-row">
+              ${catTag(item.category)}
+              <span class="tag tag-blue">✓ Verified Official Source</span>
+              <span class="tag tag-green">✓ 100% Eligible</span>
+            </div>
+            ${urgTag(item)}
+          </div>
+
+          <h1 style="font-size:24px;font-weight:800;margin-top:12px;">${item.title}</h1>
+          <p style="font-size:13px;color:#64748B;margin-top:4px;">${item.org} • Deadline: <strong>${item.date}</strong></p>
+
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-bottom:16px;border-bottom:1px solid #E2E8F0;">
+            <button class="${item.saved ? 'btn-saved' : 'btn-primary'}" data-action="toggleSave" data-id="${item.id}">${item.saved ? '✓ Saved to Tracker' : '+ Save Opportunity'}</button>
+            <button class="btn-secondary" data-action="alertModal" data-id="${item.id}">🔔 Customize Alerts</button>
+            <button class="btn-secondary" data-action="share" data-title="${item.title}">📤 Share</button>
+            <a href="${item.url}" target="_blank" rel="noopener" class="btn-external" style="margin-left:auto;">Go to Official Portal ↗</a>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">About Opportunity</h3>
+              <p style="font-size:13px;color:#475569;line-height:1.6;">${item.about}</p>
+              <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px;margin-top:14px;">
+                <div style="font-size:11px;font-weight:800;color:#1E40AF;">PRIZES & STIPEND</div>
+                <div style="font-size:13px;font-weight:700;margin-top:2px;">${item.reward}</div>
+              </div>
+
+              ${item.milestones.length ? `
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-top:16px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <strong style="font-size:13px;">Team Milestone Tracker (Click step to toggle)</strong>
+                    <button class="btn-secondary" data-action="inviteModal" data-id="${item.id}">+ Invite (${item.team.length}/4)</button>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                    ${item.milestones.map((m, idx) => `
+                      <button data-action="toggleMilestone" data-id="${item.id}" data-idx="${idx}" style="text-align:left;padding:10px;border-radius:10px;border:1px solid ${m.done ? '#6EE7B7' : '#CBD5E1'};background:${m.done ? '#ECFDF5' : '#FFF'};">
+                        <div style="font-size:11px;font-weight:800;color:${m.done ? '#047857' : '#64748B'};">${m.done ? '✓ Done' : 'Step ' + (idx+1)}</div>
+                        <div style="font-size:12px;font-weight:700;margin-top:4px;">${m.title}</div>
+                        <div style="font-size:11px;color:#64748B;">${m.due}</div>
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            <div>
+              <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:14px;">
+                <strong style="font-size:12px;color:#065F46;">BINARY ELIGIBILITY MATCH</strong>
+                <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
+                  ${item.checks.map(c => `<div style="background:#FFF;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:700;color:#166534;">✓ ${c}</div>`).join('')}
+                </div>
+              </div>
+
+              <div style="border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-top:14px;">
+                <strong style="font-size:13px;">Required Document Checklist (Click to check off)</strong>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
+                  ${item.docs.map((d, idx) => `
+                    <button data-action="toggleDoc" data-id="${item.id}" data-idx="${idx}" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid #E2E8F0;background:#FFF;text-align:left;font-size:12px;">
+                      <span>${d.done ? '☑️' : '⬜'}</span>
+                      <span style="${d.done ? 'text-decoration:line-through;color:#94A3B8;' : 'font-weight:600;'}">${d.name}</span>
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProfile() {
+      return `
+        <h1 style="font-size:22px;font-weight:800;">Personalize Your Feed</h1>
+        <p style="font-size:13px;color:#64748B;margin-top:4px;">We only use these details to rank relevant opportunities and filter eligibility.</p>
+        <div class="grid-2">
+          <div class="card">
+            <h2 style="font-size:15px;font-weight:800;margin-bottom:12px;">Academic Profile</h2>
+            <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;">Year of Study</label>
+            <select id="pYear" style="width:100%;height:38px;border-radius:10px;border:1px solid #CBD5E1;padding:0 10px;margin-bottom:12px;">
+              ${['1st Year', '2nd Year', '3rd Year', '4th Year'].map(y => `<option ${state.profile.year===y?'selected':''}>${y}</option>`).join('')}
+            </select>
+            <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;">Branch / Stream</label>
+            <select id="pBranch" style="width:100%;height:38px;border-radius:10px;border:1px solid #CBD5E1;padding:0 10px;">
+              ${['Computer Science & Engineering', 'Electronics & Communication', 'Information Technology'].map(b => `<option ${state.profile.branch===b?'selected':''}>${b}</option>`).join('')}
+            </select>
+          </div>
+          <div class="card">
+            <h2 style="font-size:15px;font-weight:800;margin-bottom:12px;">Optional Matching Details</h2>
+            <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;">City / Location</label>
+            <input id="pCity" value="${state.profile.city}" style="width:100%;height:38px;border-radius:10px;border:1px solid #CBD5E1;padding:0 10px;margin-bottom:12px;" />
+            <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;">Family income estimate</label>
+            <input id="pInc" value="${state.profile.income}" style="width:100%;height:38px;border-radius:10px;border:1px solid #CBD5E1;padding:0 10px;" />
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn-primary" data-action="saveProfile">Save & See Matches →</button>
+          <button class="btn-secondary" data-action="nav" data-target="home">Cancel</button>
+        </div>
+      `;
+    }
+
+    function openAlertModal(id) {
+      const item = state.items.find(i => i.id === id);
+      const root = document.getElementById('modalRoot');
+      root.innerHTML = `
+        <div class="modal-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <strong style="font-size:15px;">Customize Alerts — ${item.title}</strong>
+            <button data-action="closeModal" style="background:none;border:none;font-size:16px;">✕</button>
+          </div>
+          <p style="font-size:12px;color:#64748B;margin-bottom:12px;">Choose which deadline reminders you want:</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn-secondary" style="text-align:left;" data-action="toggleAlert" data-id="${item.id}" data-key="d7">${item.alerts.d7 ? '☑️' : '⬜'} 7 Days Before Deadline</button>
+            <button class="btn-secondary" style="text-align:left;" data-action="toggleAlert" data-id="${item.id}" data-key="d3">${item.alerts.d3 ? '☑️' : '⬜'} 3 Days Before Deadline</button>
+            <button class="btn-secondary" style="text-align:left;" data-action="toggleAlert" data-id="${item.id}" data-key="h24">${item.alerts.h24 ? '☑️' : '⬜'} 24 Hours Final Alert</button>
+          </div>
+          <div style="margin-top:16px;text-align:right;">
+            <button class="btn-primary" data-action="closeModalToast" data-msg="Alert schedule saved!">Done</button>
+          </div>
+        </div>
+      `;
+      root.classList.remove('hidden');
+    }
+
+    function openInviteModal(id) {
+      const item = state.items.find(i => i.id === id);
+      const root = document.getElementById('modalRoot');
+      root.innerHTML = `
+        <div class="modal-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <strong style="font-size:15px;">Invite Teammates — ${item.title}</strong>
+            <button data-action="closeModal" style="background:none;border:none;font-size:16px;">✕</button>
+          </div>
+          <p style="font-size:12px;color:#64748B;margin-bottom:12px;">Current team: ${item.team.join(', ')}</p>
+          <div style="display:flex;gap:8px;">
+            <input readonly value="https://opportunitycompass.app/team/${item.id}" style="flex:1;height:36px;border-radius:8px;border:1px solid #CBD5E1;padding:0 10px;font-size:12px;" />
+            <button class="btn-primary" data-action="closeModalToast" data-msg="WhatsApp team invite link copied!">Copy Link</button>
+          </div>
+        </div>
+      `;
+      root.classList.remove('hidden');
+    }
+
+    function render() {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.target === state.view);
+      });
+      document.getElementById('savedBadge').textContent = state.items.filter(i => i.saved).length;
+
+      const ws = document.getElementById('workspace');
+      if (state.view === 'home') ws.innerHTML = renderHome();
+      else if (state.view === 'explore') ws.innerHTML = renderExplore();
+      else if (state.view === 'saved') ws.innerHTML = renderSaved();
+      else if (state.view === 'calendar') ws.innerHTML = renderCalendar();
+      else if (state.view === 'profile') ws.innerHTML = renderProfile();
+      else if (state.view === 'detail') ws.innerHTML = renderDetail();
+    }
+
+    // Event Delegation (Works in every browser & strict CSP environment)
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+      const action = target.dataset.action;
+
+      if (action === 'nav') {
+        state.view = target.dataset.target;
+        render();
+      } else if (action === 'detail') {
+        state.selectedId = target.dataset.id;
+        state.view = 'detail';
+        render();
+      } else if (action === 'homeFilter') {
+        state.homeFilter = target.dataset.val;
+        render();
+      } else if (action === 'exploreFilter') {
+        state.exploreFilter = target.dataset.val;
+        render();
+      } else if (action === 'savedFilter') {
+        state.savedFilter = target.dataset.val;
+        render();
+      } else if (action === 'calMode') {
+        state.calMode = target.dataset.val;
+        render();
+      } else if (action === 'toggleSave') {
+        const item = state.items.find(i => i.id === target.dataset.id);
+        item.saved = !item.saved;
+        showToast(item.saved ? `Saved "${item.title}"` : `Removed "${item.title}"`);
+        render();
+      } else if (action === 'toggleMilestone') {
+        const item = state.items.find(i => i.id === target.dataset.id);
+        const m = item.milestones[Number(target.dataset.idx)];
+        m.done = !m.done;
+        showToast(`Milestone "${m.title}" updated`);
+        render();
+      } else if (action === 'toggleDoc') {
+        const item = state.items.find(i => i.id === target.dataset.id);
+        const d = item.docs[Number(target.dataset.idx)];
+        d.done = !d.done;
+        showToast('Document checklist updated');
+        render();
+      } else if (action === 'syncCal') {
+        state.calSynced = true;
+        showToast('Synced all 4 deadlines to Google Calendar');
+        render();
+      } else if (action === 'share') {
+        showToast(`Copied share link for "${target.dataset.title}"`);
+      } else if (action === 'alertModal') {
+        openAlertModal(target.dataset.id);
+      } else if (action === 'inviteModal') {
+        openInviteModal(target.dataset.id);
+      } else if (action === 'toggleAlert') {
+        const item = state.items.find(i => i.id === target.dataset.id);
+        item.alerts[target.dataset.key] = !item.alerts[target.dataset.key];
+        openAlertModal(item.id);
+        render();
+      } else if (action === 'closeModal') {
+        document.getElementById('modalRoot').classList.add('hidden');
+      } else if (action === 'closeModalToast') {
+        document.getElementById('modalRoot').classList.add('hidden');
+        showToast(target.dataset.msg);
+      } else if (action === 'saveProfile') {
+        state.profile.year = document.getElementById('pYear').value;
+        state.profile.branch = document.getElementById('pBranch').value;
+        state.profile.city = document.getElementById('pCity').value;
+        state.profile.income = document.getElementById('pInc').value;
+        document.getElementById('subProfile').textContent = `${state.profile.year.replace('Year', 'Yr')} · CSE`;
+        state.view = 'home';
+        showToast('Profile saved! Personalized feed updated.');
+        render();
+      }
+    });
+
+    document.getElementById('notifBtn').addEventListener('click', () => {
+      document.getElementById('notifPopover').classList.toggle('hidden');
+    });
+    document.getElementById('closeNotifBtn').addEventListener('click', () => {
+      document.getElementById('notifPopover').classList.add('hidden');
+    });
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      state.query = e.target.value.trim().toLowerCase();
+      if (state.query && state.view !== 'explore') state.view = 'explore';
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
